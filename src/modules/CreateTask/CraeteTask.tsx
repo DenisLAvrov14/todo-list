@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
-import styles from "./CreateTask.module.css";
+import styles from "../../components/CreateTask.module.css";
+import stylesIcon from "../../components/IconButtons.module.css"
 import { BiSolidPlusCircle } from "react-icons/bi";
 import { useDispatch } from "react-redux";
 import { addTask } from "../../redux/taskSlice/CreateTaskSlice";
@@ -30,9 +31,10 @@ const CreateTask: React.FC = () => {
                     placeholder="Enter your task"
                     value={taskDescription}
                     onChange={handleInputChange}
+                    autoFocus
                 />
-                <button className={styles.button} onClick={handleClick}>
-                    <BiSolidPlusCircle className={styles.icon} />
+                <button className={stylesIcon.IconButtons} onClick={handleClick}>
+                    <BiSolidPlusCircle title="Add task" />
                 </button>
                 <select>
                     <option value="all">All</option>

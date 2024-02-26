@@ -1,7 +1,7 @@
 import "./App.css";
 import CreateTask from "./modules/CreateTask/CraeteTask";
 import TaskDeck from "./modules/TaskDeck/TaskDeck";
-import styles from "./modules/TaskDeck/TaskDeck.module.css";
+import styles from "./components/CreateTask.module.css";
 import { useSelector } from "./redux/store";
 // import { useSelector } from "react-redux";
 // import { RootState } from "./redux/store";

@@ -6,7 +6,8 @@ import {
     BiTaskX,
     BiEditAlt,
 } from "react-icons/bi";
-import styles from "./TaskDeck.module.css";
+import styles from "../../components/TaskDeck.module.css";
+import stylesIcon from "../../components/IconButtons.module.css"
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
 import { editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
@@ -40,23 +41,25 @@ const TaskDeck: React.FC<Props> = (props) => {
     const renderEditButton = useCallback(() => {
         if (!isEdit) {
             return (
-                <button onClick={handleEdit}>
-                    <BiEditAlt className={styles.icon} />
-                </button>
+                <>
+                    <button className={stylesIcon.IconButtons} ><BiSolidHappyBeaming title="Done" /></button>
+                    <button className={stylesIcon.IconButtons} onClick={handleEdit}><BiEditAlt title="Edit" /></button>
+                    <button className={stylesIcon.IconButtons} onClick={handleDelete}><BiSolidTrash title="Trash can" /></button>
+                </>
             );
         }
         return (
             <>
-                <button onClick={handleSave}>  <BiTask className={styles.icon} /></button>
-                <button onClick={handleCancel}> <BiTaskX className={styles.icon} /></button>
+                <button className={stylesIcon.IconButtons} onClick={handleSave}><BiTask title="Accept" /></button>
+                <button className={stylesIcon.IconButtons} onClick={handleCancel}><BiTaskX title="Undo" /></button>
             </>
         );
     }, [isEdit, handleEdit, handleSave, handleCancel]);
 
     return (
         <li>
-            <div className={styles["task-container"]}>
-                {!isEdit && <div>{task.description}</div>}
+            <div className={styles.taskContainer}>
+                {!isEdit && <div className={styles.task}>{task.description}</div>}
                 {isEdit && (
                     <input
                         type="text"
@@ -67,9 +70,6 @@ const TaskDeck: React.FC<Props> = (props) => {
                 )}
             </div>
             <div className={styles.buttons}>
-                <button onClick={handleDelete}>
-                    <BiSolidTrash className={styles.icon} />
-                </button>
                 {renderEditButton()}
             </div>
         </li>
