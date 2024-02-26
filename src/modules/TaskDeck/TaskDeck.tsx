@@ -8,6 +8,7 @@ import {
 } from "react-icons/bi";
 import styles from "../../components/TaskDeck.module.css";
 import stylesIcon from "../../components/IconButtons.module.css"
+import stylesTaskInput from "../../components/TaskInput.module.css"
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
 import { editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
@@ -59,7 +60,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     return (
         <li>
             <div className={styles.taskContainer}>
-                {!isEdit && <div className={styles.task}>{task.description}</div>}
+                {!isEdit && <div className={stylesTaskInput.taskInput}>{task.description}</div>}
                 {isEdit && (
                     <input
                         type="text"
