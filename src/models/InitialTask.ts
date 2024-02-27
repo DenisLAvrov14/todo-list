@@ -5,6 +5,7 @@ export type InitialStateTask = {
     allIds: number[];
     byId: Record<number, Task>;
   };
+  filter: string;
 };
 
 const qwe = {

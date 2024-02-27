@@ -7,17 +7,22 @@
 }
 
 .taskContainer {
-  background-color: aliceblue;
-  width: 408px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: yellow;
+  border: 1px solid bisque;
+  width: 404px;
   height: 31px;
-  margin-right: 3px;
+  border-radius: 3px;
+  margin-right: 5px;
   cursor: pointer;
 }
 
-.task-container.done {
+/* .task-container.done {
   text-decoration: line-through;
   color: grey;
-}
+} */
 
 .buttons {
   display: flex;

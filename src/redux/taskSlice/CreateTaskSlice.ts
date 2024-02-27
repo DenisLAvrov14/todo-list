@@ -11,6 +11,7 @@ const initialState: InitialStateTask = {
     allIds: [],
     byId: {},
   },
+  filter: "",
 };
 
 export const CreateTaskSlice = createSlice({
@@ -58,7 +59,12 @@ export const CreateTaskSlice = createSlice({
         taskAsDone.isDone = !taskAsDone.isDone;
       }
     },
+    setFilterValueAC: (state, action: PayloadAction<string>) => {
+      state.filter = action.payload;
+    },
   },
 });
 
-export const { addTask, removeTask, editTask } = CreateTaskSlice.actions;
+export const { addTask, removeTask, editTask, setFilterValueAC } =
+  CreateTaskSlice.actions;
+

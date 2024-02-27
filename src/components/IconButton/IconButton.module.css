@@ -1,4 +1,4 @@
-.IconButtons {
+.IconButton {
   background-color: red;
   height: 32px;
   width: 34px;
@@ -11,13 +11,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
 
-.IconButtons svg {
-  height: 100%;
-  width: 100%;
-}
+  &:hover {
+    background-color: DeepSkyBlue;
+  }
 
-.IconButtons:hover {
-  background-color: DeepSkyBlue;
+  & svg {
+    height: 100%;
+    width: 100%;
+  }
 }

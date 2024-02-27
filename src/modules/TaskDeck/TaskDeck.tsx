@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
     BiSolidHappyBeaming,
     BiSolidTrash,
@@ -7,11 +7,13 @@ import {
     BiEditAlt,
 } from "react-icons/bi";
 import styles from "../../components/TaskDeck.module.css";
-import stylesIcon from "../../components/IconButtons.module.css"
-import stylesTaskInput from "../../components/TaskInput.module.css"
+// import stylesIcon from "../../components/IconButtons.module.css"
+// import stylesTaskInput from "../../components/TaskInput.module.css"
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
 import { editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
+import { TaskInput } from "../../components/TaskInput/TaskInput";
+import { IconButton } from "../../components/IconButton/IconButton";
 
 type Props = {
     task: Task;
@@ -43,36 +45,39 @@ const TaskDeck: React.FC<Props> = (props) => {
         if (!isEdit) {
             return (
                 <>
-                    <button className={stylesIcon.IconButtons} ><BiSolidHappyBeaming title="Done" /></button>
-                    <button className={stylesIcon.IconButtons} onClick={handleEdit}><BiEditAlt title="Edit" /></button>
-                    <button className={stylesIcon.IconButtons} onClick={handleDelete}><BiSolidTrash title="Trash can" /></button>
+                    <IconButton>
+                        <BiSolidHappyBeaming title="Done" />
+                    </IconButton>
+                    <IconButton onClick={handleEdit}>
+                        <BiEditAlt title="Edit" />
+                    </IconButton>
+                    <IconButton onClick={handleDelete}>
+                        <BiSolidTrash title="Trash can" />
+                    </IconButton>
                 </>
             );
         }
         return (
             <>
-                <button className={stylesIcon.IconButtons} onClick={handleSave}><BiTask title="Accept" /></button>
-                <button className={stylesIcon.IconButtons} onClick={handleCancel}><BiTaskX title="Undo" /></button>
+                <IconButton onClick={handleSave}>
+                    <BiTask title="Accept" />
+                </IconButton>
+                <IconButton onClick={handleCancel}>
+                    <BiTaskX title="Undo" />
+                </IconButton>
             </>
         );
     }, [isEdit, handleEdit, handleSave, handleCancel]);
 
     return (
         <li>
-            <div className={styles.taskContainer}>
-                {!isEdit && <div className={stylesTaskInput.taskInput}>{task.description}</div>}
+            <div >
+                {!isEdit && <div className={styles.taskContainer}>{task.description}</div>}
                 {isEdit && (
-                    <input
-                        type="text"
-                        defaultValue={task.description}
-                        onBlur={handleEdit}
-                        autoFocus
-                    />
+                    <TaskInput defaultValue={task.description} onBlur={handleEdit} />
                 )}
             </div>
-            <div className={styles.buttons}>
-                {renderEditButton()}
-            </div>
+            <div className={styles.buttons}>{renderEditButton()}</div>
         </li>
     );
 };
