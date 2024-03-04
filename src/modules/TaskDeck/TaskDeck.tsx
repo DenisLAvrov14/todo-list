@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import {
     BiSolidHappyBeaming,
     BiSolidTrash,
@@ -6,12 +6,10 @@ import {
     BiTaskX,
     BiEditAlt,
 } from "react-icons/bi";
-import styles from "../../components/TaskDeck.module.css";
-// import stylesIcon from "../../components/IconButtons.module.css"
-// import stylesTaskInput from "../../components/TaskInput.module.css"
+import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
-import { editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
+import { switchIsDone, editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 
@@ -24,6 +22,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     const dispatch = useDispatch();
 
     const [isEdit, setIsEdit] = useState<boolean>(false);
+    const [inputEdit, setInputEdit] = useState<string>(task.description);
 
     const handleEdit = useCallback(() => {
         setIsEdit((prev) => !prev);
@@ -34,19 +33,30 @@ const TaskDeck: React.FC<Props> = (props) => {
     }, [dispatch, task.id]);
 
     const handleSave = useCallback(() => {
+        dispatch(editTask({ id: task.id, description: inputEdit }));
         setIsEdit(false);
-    }, []);
+    }, [dispatch, task.id, inputEdit]);
 
     const handleCancel = useCallback(() => {
         setIsEdit(false);
     }, []);
+
+    const handleChangeInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+        setInputEdit(e.target.value)
+    }, [])
+
+    const handleIsDone = useCallback(() => {
+        dispatch(switchIsDone({ id: task.id }));
+    }, [dispatch]);
+
+
 
     const renderEditButton = useCallback(() => {
         if (!isEdit) {
             return (
                 <>
                     <IconButton>
-                        <BiSolidHappyBeaming title="Done" />
+                        <BiSolidHappyBeaming title="Done" onClick={handleIsDone} />
                     </IconButton>
                     <IconButton onClick={handleEdit}>
                         <BiEditAlt title="Edit" />
@@ -71,10 +81,12 @@ const TaskDeck: React.FC<Props> = (props) => {
 
     return (
         <li>
-            <div >
-                {!isEdit && <div className={styles.taskContainer}>{task.description}</div>}
+            <div>
+                {!isEdit && (
+                    <div className={styles.taskContainer}>{task.description}</div>
+                )}
                 {isEdit && (
-                    <TaskInput defaultValue={task.description} onBlur={handleEdit} />
+                    <TaskInput autoFocus value={inputEdit} onChange={handleChangeInput} />
                 )}
             </div>
             <div className={styles.buttons}>{renderEditButton()}</div>
@@ -83,3 +95,5 @@ const TaskDeck: React.FC<Props> = (props) => {
 };
 
 export default TaskDeck;
+
+

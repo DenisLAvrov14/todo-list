@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { InitialStateTask } from "../../models/InitialTask";
+import { Filter, InitialStateTask } from "../../models/InitialTask";
 import { Task } from "../../models/Task";
 
 type AddTaskPayload = {
@@ -11,7 +11,7 @@ const initialState: InitialStateTask = {
     allIds: [],
     byId: {},
   },
-  filter: "",
+  filter: "all",
 };
 
 export const CreateTaskSlice = createSlice({
@@ -59,12 +59,11 @@ export const CreateTaskSlice = createSlice({
         taskAsDone.isDone = !taskAsDone.isDone;
       }
     },
-    setFilterValueAC: (state, action: PayloadAction<string>) => {
+    setFilterValueAC: (state, action: PayloadAction<Filter>) => {
       state.filter = action.payload;
     },
   },
 });
 
-export const { addTask, removeTask, editTask, setFilterValueAC } =
+export const { addTask, removeTask, editTask, setFilterValueAC, switchIsDone } =
   CreateTaskSlice.actions;
-

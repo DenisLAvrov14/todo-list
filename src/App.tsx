@@ -1,31 +1,29 @@
 import "./App.css";
 import CreateTask from "./modules/CreateTask/CraeteTask";
-import TaskDeck from "./modules/TaskDeck/TaskDeck";
-import styles from "./components/CreateTask.module.css";
+import TaskDeck from "./modules/TaskDeck/TaskDeck"
+import styles from "./modules/CreateTask/CreateTask.module.css";
 import { useSelector } from "./redux/store";
-// import { useSelector } from "react-redux";
-// import { RootState } from "./redux/store";
-
-// const initialList: Task[] = [
-//   {
-//     id: 1,
-//     discription: "string",
-//     isDone: true,
-//   },
-//   {
-//     id: 2,
-//     discription: "second",
-//     isDone: true,
-//   },
-//   {
-//     id: 3,
-//     discription: "third",
-//     isDone: true,
-//   },
-// ];
+import { useMemo } from "react";
 
 function App() {
   const { allIds, byId } = useSelector((state) => state.todoTasks.tasks);
+  const filter = useSelector((state) => state.todoTasks.filter);
+
+  const taskList = useMemo(() => allIds.map((id) => byId[id]), [allIds, byId]);
+
+  const data = useMemo(() => {
+    switch (filter) {
+      case "all":
+        return taskList;
+
+      case "done":
+        return taskList.filter(({ isDone }) => isDone);
+
+      case "undone":
+        return taskList.filter(({ isDone }) => !isDone);
+    }
+
+  }, [taskList, filter]);
 
   console.log("byId", byId);
 
@@ -33,8 +31,8 @@ function App() {
     <div>
       <CreateTask />
       <ul className={styles.tracker}>
-        {allIds.map((id) => (
-          <TaskDeck key={id} task={byId[id]} />
+        {data.map((task) => (
+          <TaskDeck key={task.id} task={task} />
         ))}
       </ul>
     </div>

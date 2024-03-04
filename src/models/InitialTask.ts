@@ -5,13 +5,7 @@ export type InitialStateTask = {
     allIds: number[];
     byId: Record<number, Task>;
   };
-  filter: string;
+  filter: Filter;
 };
 
-const qwe = {
-  asd: "asd",
-};
-
-const computedKey = "asd";
-
-const asd = qwe[computedKey];
+export type Filter = "all" | "done" | "undone";
