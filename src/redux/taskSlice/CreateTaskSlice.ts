@@ -21,7 +21,7 @@ export const CreateTaskSlice = createSlice({
     addTask: (state, action: PayloadAction<AddTaskPayload>) => {
       const { description } = action.payload;
 
-      const id = Math.floor(Math.random() * 10000000);
+      const id = String(Math.floor(Math.random() * 10000000));
 
       const newTask: Task = {
         id,
@@ -32,7 +32,7 @@ export const CreateTaskSlice = createSlice({
       state.tasks.byId[id] = newTask;
       state.tasks.allIds.push(newTask.id);
     },
-    removeTask: (state, action: PayloadAction<number>) => {
+    removeTask: (state, action: PayloadAction<string>) => {
       const idToRemove = action.payload;
 
       state.tasks.allIds = state.tasks.allIds.filter(
@@ -40,10 +40,7 @@ export const CreateTaskSlice = createSlice({
       );
       delete state.tasks.byId[idToRemove];
     },
-    editTask: (
-      state,
-      action: PayloadAction<{ id: number; description: string }>
-    ) => {
+    editTask: (state, action: PayloadAction<Task>) => {
       const { id, description } = action.payload;
 
       const taskToEdit = state.tasks.byId[id];
@@ -51,19 +48,19 @@ export const CreateTaskSlice = createSlice({
         taskToEdit.description = description;
       }
     },
-    switchIsDone: (state, action: PayloadAction<{ id: number }>) => {
-      const { id } = action.payload;
+    // switchIsDone: (state, action: PayloadAction<{ id: number }>) => {
+    //   const { id } = action.payload;
 
-      const taskAsDone = state.tasks.byId[id];
-      if (taskAsDone) {
-        taskAsDone.isDone = !taskAsDone.isDone;
-      }
-    },
+    //   const taskAsDone = state.tasks.byId[id];
+    //   if (taskAsDone) {
+    //     taskAsDone.isDone = !taskAsDone.isDone;
+    //   }
+    // },
     setFilterValueAC: (state, action: PayloadAction<Filter>) => {
       state.filter = action.payload;
     },
   },
 });
 
-export const { addTask, removeTask, editTask, setFilterValueAC, switchIsDone } =
+export const { addTask, removeTask, editTask, setFilterValueAC } =
   CreateTaskSlice.actions;

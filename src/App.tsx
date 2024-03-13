@@ -1,9 +1,11 @@
 import "./App.css";
 import CreateTask from "./modules/CreateTask/CraeteTask";
-import TaskDeck from "./modules/TaskDeck/TaskDeck"
+import TaskDeck from "./modules/TaskDeck/TaskDeck";
 import styles from "./modules/CreateTask/CreateTask.module.css";
 import { useSelector } from "./redux/store";
 import { useMemo } from "react";
+import todosService from "./services/todos.service";
+import { useQuery } from "@tanstack/react-query";
 
 function App() {
   const { allIds, byId } = useSelector((state) => state.todoTasks.tasks);
@@ -11,29 +13,44 @@ function App() {
 
   const taskList = useMemo(() => allIds.map((id) => byId[id]), [allIds, byId]);
 
-  const data = useMemo(() => {
-    switch (filter) {
-      case "all":
-        return taskList;
+  // сделать что бы фильтрация работала
+  const { isLoading, data: queryData } = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => todosService.getAll(),
+    select: ({ data }) => data,
+  });
 
-      case "done":
-        return taskList.filter(({ isDone }) => isDone);
+  const filteredData = useMemo(() => {
+    if (queryData) {
+      switch (filter) {
+        case "all":
+          return queryData;
 
-      case "undone":
-        return taskList.filter(({ isDone }) => !isDone);
+        case "done":
+          return queryData.filter(({ isDone }) => isDone);
+
+        case "undone":
+          return queryData.filter(({ isDone }) => !isDone);
+
+        default:
+          return [];
+      }
     }
 
-  }, [taskList, filter]);
-
-  console.log("byId", byId);
+    return [];
+  }, [filter, queryData]);
 
   return (
     <div>
       <CreateTask />
       <ul className={styles.tracker}>
-        {data.map((task) => (
-          <TaskDeck key={task.id} task={task} />
-        ))}
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : filteredData?.length ? (
+          filteredData.map((task) => <TaskDeck key={task.id} task={task} />)
+        ) : (
+          <h1>Data not found</h1>
+        )}
       </ul>
     </div>
   );

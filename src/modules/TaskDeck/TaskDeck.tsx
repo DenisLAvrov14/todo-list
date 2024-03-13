@@ -9,7 +9,7 @@ import {
 import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
-import { switchIsDone, editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
+import { editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 
@@ -33,7 +33,12 @@ const TaskDeck: React.FC<Props> = (props) => {
     }, [dispatch, task.id]);
 
     const handleSave = useCallback(() => {
-        dispatch(editTask({ id: task.id, description: inputEdit }));
+        dispatch(
+            editTask({
+                ...task,
+                description: inputEdit,
+            })
+        );
         setIsEdit(false);
     }, [dispatch, task.id, inputEdit]);
 
@@ -42,14 +47,17 @@ const TaskDeck: React.FC<Props> = (props) => {
     }, []);
 
     const handleChangeInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-        setInputEdit(e.target.value)
-    }, [])
+        setInputEdit(e.target.value);
+    }, []);
 
     const handleIsDone = useCallback(() => {
-        dispatch(switchIsDone({ id: task.id }));
+        dispatch(
+            editTask({
+                ...task,
+                isDone: !task.isDone,
+            })
+        );
     }, [dispatch]);
-
-
 
     const renderEditButton = useCallback(() => {
         if (!isEdit) {
@@ -95,5 +103,3 @@ const TaskDeck: React.FC<Props> = (props) => {
 };
 
 export default TaskDeck;
-
-
