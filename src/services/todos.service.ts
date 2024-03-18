@@ -61,7 +61,8 @@ class TodosService {
   }
 
   async deleteTask(id: string) {
-    moks = moks.filter((task) => task.id !== task.id);
+    // починить сравнение
+    moks = moks.filter((task) => task.id !== id);
 
     return resolveWithValue({ status: 200 }, 1000);
   }

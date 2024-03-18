@@ -4,21 +4,15 @@ import TaskDeck from "./modules/TaskDeck/TaskDeck";
 import styles from "./modules/CreateTask/CreateTask.module.css";
 import { useSelector } from "./redux/store";
 import { useMemo } from "react";
-import todosService from "./services/todos.service";
-import { useQuery } from "@tanstack/react-query";
+import { useTodos } from "./hooks/useTodos";
 
 function App() {
-  const { allIds, byId } = useSelector((state) => state.todoTasks.tasks);
+  // const { allIds, byId } = useSelector((state) => state.todoTasks.tasks);
   const filter = useSelector((state) => state.todoTasks.filter);
 
-  const taskList = useMemo(() => allIds.map((id) => byId[id]), [allIds, byId]);
+  // const taskList = useMemo(() => allIds.map((id) => byId[id]), [allIds, byId]);
 
-  // сделать что бы фильтрация работала
-  const { isLoading, data: queryData } = useQuery({
-    queryKey: ["todos"],
-    queryFn: () => todosService.getAll(),
-    select: ({ data }) => data,
-  });
+  const { isLoading, data: queryData } = useTodos();
 
   const filteredData = useMemo(() => {
     if (queryData) {
