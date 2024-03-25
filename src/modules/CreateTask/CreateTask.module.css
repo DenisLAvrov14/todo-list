@@ -13,3 +13,11 @@
   flex-direction: row;
   justify-content: center;
 }
+
+.ChangeThemeContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 10px;
+  margin-top: 10px;
+}

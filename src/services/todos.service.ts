@@ -1,11 +1,10 @@
 import { Task } from "../models/Task";
-import { moks as rawMocks } from "../moks/moks";
+import { mocks as rawMocks } from "../moks/moks";
 
-let moks = rawMocks;
+let mocks = rawMocks;
 
-// функция должна возвращать Promise, который вернет значение через заданное кол-во ms
 // перенести хелпер в папку utils
-const resolveWithValue = <T>(data: T, ms: number): Promise<T> => {
+export const resolveWithValue = <T>(data: T, ms: number): Promise<T> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(data);
@@ -46,39 +45,48 @@ class TodosService {
   async getAll() {
     // return axios.get<Task[]>(`${this.URL}/todos`);
 
-    return resolveWithValue<TResponse<Task[]>>({ data: moks }, 1000);
+    return resolveWithValue<TResponse<Task[]>>({ data: mocks }, 1000);
   }
 
   async getById(id: string) {
     // return axios.get<Task>(`${this.URL}/${id}`);
-    const task = moks.find((task) => task.id === id);
+    const task = mocks.find((task) => task.id === id);
 
     if (!task) {
       return rejectWithValue("Task not found", 1000);
     }
 
-    return resolveWithValue<TResponse<Task[]>>({ data: moks }, 1000);
+    return resolveWithValue<TResponse<Task[]>>({ data: mocks }, 1000);
   }
 
   async deleteTask(id: string) {
-    // починить сравнение
-    moks = moks.filter((task) => task.id !== id);
+    mocks = mocks.filter((task) => task.id !== id);
 
     return resolveWithValue({ status: 200 }, 1000);
   }
 
-  // сделать параметры обьектом
-  async addTask(id: string, description: string, isDone: boolean) {
+  async addTask(task: { id: string; description: string; isDone: boolean }) {
     const newTask: Task = {
-      id,
-      description,
+      id: task.id,
+      description: task.description,
       isDone: false,
     };
 
-    const addTask = moks.push(newTask);
+    const addTask = mocks.push(newTask);
 
     return resolveWithValue({ data: newTask, status: 200 }, 1000);
   }
+
+  async taskIsDone(id: string) {
+    const taskIndex = mocks.findIndex((task) => task.id === id);
+    if (taskIndex !== -1) {
+      mocks[taskIndex].isDone = true;
+
+      return resolveWithValue<TResponse<Task[]>>({ data: mocks }, 1000);
+    }
+  }
+
+  // editTask, taskIsDone, save добавить
 }
 
 export default new TodosService();

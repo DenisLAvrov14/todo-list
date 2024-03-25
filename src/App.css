@@ -28,6 +28,24 @@
   color: #61dafb;
 }
 
+body.light {
+  --body-background-color: white;
+  --h2--color: white;
+  --h2--webkit-text-stroke: black 1px;
+  --color: red;
+  --border-color: black;
+  --color--a: darkgrey;
+}
+
+body {
+  --body-background-color: black;
+  --h2--color: black;
+  --h2--webkit-text-stroke: grey 1px;
+  --color: green;
+  --border-color: darkgrey;
+  --color--a: white;
+}
+
 ul {
   width: 100%;
   display: flex;
@@ -48,8 +66,11 @@ li {
 }
 
 h2 {
-  color: antiquewhite;
+  color: var(--h2--color);
   margin-bottom: 10px;
+  margin-top: -10px;
+  letter-spacing: 1px;
+  -webkit-text-stroke: var(--h2--webkit-text-stroke);
 }
 
 input {

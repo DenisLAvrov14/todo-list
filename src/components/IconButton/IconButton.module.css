@@ -1,11 +1,11 @@
 .IconButton {
-  background-color: red;
+  background-color: var(--color);
   height: 32px;
   width: 34px;
   color: whitesmoke;
-  border: 1px solid;
+  border: 2px solid;
   border-radius: 3px;
-  border-color: black;
+  border-color: var(--border-color);
   margin-right: 5px;
   cursor: pointer;
   display: flex;

@@ -1,6 +1,6 @@
 import { Task } from "../models/Task";
 
-export const moks: Task[] = [
+export const mocks: Task[] = [
   {
     description: "Feed the cat",
     id: "999",

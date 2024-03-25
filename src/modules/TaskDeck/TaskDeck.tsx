@@ -9,17 +9,14 @@ import {
 import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
-import { editTask, removeTask } from "../../redux/taskSlice/CreateTaskSlice";
+import { editTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 import {
-    //   QueryClient,
     useMutation,
     useQueryClient,
 } from "@tanstack/react-query";
-import { QueryClient } from "react-query";
-import useDeleteTask from "../../hooks/useDeleteTask";
-import { moks } from "../../moks/moks";
+import todosService from "../../services/todos.service";
 
 type Props = {
     task: Task;
@@ -28,10 +25,6 @@ type Props = {
 const TaskDeck: React.FC<Props> = (props) => {
     const { task } = props;
     const dispatch = useDispatch();
-
-    const queryClient: QueryClient = useQueryClient();
-    console.log("queryClient", queryClient);
-    const { mutate: deleteMutate } = useDeleteTask(queryClient);
 
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [inputEdit, setInputEdit] = useState<string>(task.description);
@@ -44,19 +37,27 @@ const TaskDeck: React.FC<Props> = (props) => {
     //     dispatch(removeTask(task.id));
     // }, [dispatch, task.id]);
 
-    // const handleDelete = useCallback(async (id: string) => {
-    //     // сделать удаление таска
-    //     try {
-    //         if (deleteTask !== undefined) {
-    //             await deleteTask(id);
-    //         } else {
-    //             console.error('deleteTask is undefined');
-    //         }
-    //     } catch (error) {
-    //         console.error('An error occurred while deleting the task:', error);
-    //     }
-    //     invalidateQueries(["todos"]);
-    // }, [invalidateQueries]);
+    const taskId = task.id;
+    const queryClient = useQueryClient();
+
+    const mutationDelete = useMutation({
+        mutationFn: async (taskId: string) => {
+            const result = await todosService.deleteTask(taskId);
+            return result;
+        },
+        onSuccess: () => {
+            alert("Task was deleted");
+            queryClient.invalidateQueries({ queryKey: ['todos'] });
+        },
+    });
+
+    const onDeleteTask = useCallback(
+        async () => {
+            const deleteTask = await mutationDelete.mutate(taskId);
+        },
+        [mutationDelete, taskId]
+    );
+
 
     const handleSave = useCallback(() => {
         dispatch(
@@ -76,28 +77,45 @@ const TaskDeck: React.FC<Props> = (props) => {
         setInputEdit(e.target.value);
     }, []);
 
-    const handleIsDone = useCallback(() => {
-        dispatch(
-            editTask({
-                ...task,
-                isDone: !task.isDone,
-            })
-        );
-    }, [dispatch]);
+    const mutationAsDone = useMutation({
+        mutationFn: async (taskId: string) => {
+            const result = await todosService.taskIsDone(taskId)
+            return result
+        },
+        onSuccess: () => {
+            alert("Task marked as done");
+            queryClient.invalidateQueries({ queryKey: ['todos'] });
+        }
+    })
+
+    const handleIsDone = useCallback(async (event: React.MouseEvent<HTMLButtonElement>) => {
+        const markAsDone = await mutationAsDone.mutate(taskId)
+    }, [mutationAsDone, taskId])
+
+    // const handleIsDone = useCallback(() => {
+    //     dispatch(
+    //         editTask({
+    //             ...task,
+    //             isDone: !task.isDone,
+    //         })
+    //     );
+    // }, [dispatch]); 
+
+
 
     const renderEditButton = useCallback(() => {
         if (!isEdit) {
             return (
                 <>
-                    <IconButton>
-                        <BiSolidHappyBeaming title="Done" onClick={handleIsDone} />
+                    <IconButton onClick={handleIsDone}>
+                        <BiSolidHappyBeaming title="Done" />
                     </IconButton>
                     <IconButton onClick={handleEdit}>
                         <BiEditAlt title="Edit" />
                     </IconButton>
-                    {/* <IconButton onClick={() => deleteMutate(task.id)}>
+                    <IconButton onClick={onDeleteTask}>
                         <BiSolidTrash title="Trash can" />
-                    </IconButton> */}
+                    </IconButton>
                 </>
             );
         }
