@@ -45,7 +45,7 @@ const CreateTask: React.FC = () => {
 
     const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setTaskDescription(e.target.value);
-    }, []);
+    }, [setTaskDescription]);
 
     const setFilter = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
         setFilterValue(event.target.value as Filter);

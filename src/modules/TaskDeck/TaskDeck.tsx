@@ -1,10 +1,10 @@
 import React, { ChangeEvent, useCallback, useState } from "react";
 import {
-    BiSolidHappyBeaming,
     BiSolidTrash,
     BiTask,
     BiTaskX,
     BiEditAlt,
+    BiCheck,
 } from "react-icons/bi";
 import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
@@ -12,10 +12,7 @@ import { useDispatch } from "react-redux";
 import { editTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
-import {
-    useMutation,
-    useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import todosService from "../../services/todos.service";
 
 type Props = {
@@ -47,17 +44,13 @@ const TaskDeck: React.FC<Props> = (props) => {
         },
         onSuccess: () => {
             alert("Task was deleted");
-            queryClient.invalidateQueries({ queryKey: ['todos'] });
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
         },
     });
 
-    const onDeleteTask = useCallback(
-        async () => {
-            const deleteTask = await mutationDelete.mutate(taskId);
-        },
-        [mutationDelete, taskId]
-    );
-
+    const onDeleteTask = useCallback(async () => {
+        const deleteTask = await mutationDelete.mutate(taskId);
+    }, [mutationDelete, taskId]);
 
     const handleSave = useCallback(() => {
         dispatch(
@@ -79,18 +72,21 @@ const TaskDeck: React.FC<Props> = (props) => {
 
     const mutationAsDone = useMutation({
         mutationFn: async (taskId: string) => {
-            const result = await todosService.taskIsDone(taskId)
-            return result
+            const result = await todosService.taskIsDone(taskId);
+            return result;
         },
         onSuccess: () => {
             alert("Task marked as done");
-            queryClient.invalidateQueries({ queryKey: ['todos'] });
-        }
-    })
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+    });
 
-    const handleIsDone = useCallback(async (event: React.MouseEvent<HTMLButtonElement>) => {
-        const markAsDone = await mutationAsDone.mutate(taskId)
-    }, [mutationAsDone, taskId])
+    const handleIsDone = useCallback(
+        async (event: React.MouseEvent<HTMLButtonElement>) => {
+            const markAsDone = await mutationAsDone.mutate(taskId);
+        },
+        [mutationAsDone, taskId]
+    );
 
     // const handleIsDone = useCallback(() => {
     //     dispatch(
@@ -99,16 +95,14 @@ const TaskDeck: React.FC<Props> = (props) => {
     //             isDone: !task.isDone,
     //         })
     //     );
-    // }, [dispatch]); 
-
-
+    // }, [dispatch]);
 
     const renderEditButton = useCallback(() => {
         if (!isEdit) {
             return (
                 <>
                     <IconButton onClick={handleIsDone}>
-                        <BiSolidHappyBeaming title="Done" />
+                        <BiCheck title="Done" />
                     </IconButton>
                     <IconButton onClick={handleEdit}>
                         <BiEditAlt title="Edit" />

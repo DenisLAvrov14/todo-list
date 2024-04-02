@@ -12,7 +12,7 @@ export const ChangeTheme = () => {
 
     return (
         <button className={styles.ChangeTheme} onClick={toggleTheme}>
-            {theme === "dark" ? <BiSun /> : <BiMoon />}
+            {theme === "dark" ? <BiSun title="Light theme" /> : <BiMoon title="Dark theme" />}
         </button>
     );
 }
