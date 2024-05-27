@@ -1,10 +1,14 @@
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { ChangeEvent, useCallback, useState, useEffect } from "react";
 import {
     BiSolidTrash,
     BiTask,
     BiTaskX,
     BiEditAlt,
     BiCheck,
+    BiPlay,
+    BiPause,
+    BiReset,
+    BiTimer
 } from "react-icons/bi";
 import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
@@ -25,14 +29,15 @@ const TaskDeck: React.FC<Props> = (props) => {
 
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [inputEdit, setInputEdit] = useState<string>(task.description);
+    const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+    const [isTimerVisible, setIsTimerVisible] = useState<boolean>(false);
+    const [time, setTime] = useState(0);
+    const [isRunning, setIsRunning] = useState(false);
+    const [timerStarted, setTimerStarted] = useState<boolean>(false);
 
     const handleEdit = useCallback(() => {
         setIsEdit((prev) => !prev);
     }, []);
-
-    // const handleDelete = useCallback(() => {
-    //     dispatch(removeTask(task.id));
-    // }, [dispatch, task.id]);
 
     const taskId = task.id;
     const queryClient = useQueryClient();
@@ -49,7 +54,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     });
 
     const onDeleteTask = useCallback(async () => {
-        const deleteTask = await mutationDelete.mutate(taskId);
+        await mutationDelete.mutate(taskId);
     }, [mutationDelete, taskId]);
 
     const handleSave = useCallback(() => {
@@ -83,60 +88,122 @@ const TaskDeck: React.FC<Props> = (props) => {
 
     const handleIsDone = useCallback(
         async (event: React.MouseEvent<HTMLButtonElement>) => {
-            const markAsDone = await mutationAsDone.mutate(taskId);
+            setIsTimerRunning(true);
+            setIsTimerVisible(true);
+            setTimerStarted(true);
         },
-        [mutationAsDone, taskId]
+        []
     );
 
-    // const handleIsDone = useCallback(() => {
-    //     dispatch(
-    //         editTask({
-    //             ...task,
-    //             isDone: !task.isDone,
-    //         })
-    //     );
-    // }, [dispatch]);
+    const mutationSaveTime = useMutation({
+        mutationFn: async ({ taskId, time }: { taskId: string, time: number }) => {
+            const result = await todosService.saveTaskTime({ taskId, time });
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+    });
 
-    const renderEditButton = useCallback(() => {
-        if (!isEdit) {
+    const saveTime = (taskId: string, time: number) => {
+        mutationSaveTime.mutate({ taskId, time });
+    };
+
+    const handleStop = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        setIsTimerRunning(false);
+        setIsTimerVisible(false);
+        await mutationAsDone.mutate(taskId);
+    };
+
+    const handleReset = () => {
+        setIsTimerRunning(false);
+        setIsTimerVisible(false);
+        setTime(0);
+        saveTime(taskId, 0); // Resetting time to 0
+    };
+
+    const handlePlayPause = () => {
+        setIsRunning(prevIsRunning => !prevIsRunning);
+    };
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isRunning) {
+            interval = setInterval(() => {
+                setTime(prevTime => prevTime + 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [isRunning]);
+
+    const toggleTimerVisibility = () => {
+        if (timerStarted) {
+            setIsTimerVisible(!isTimerVisible);
+        }
+    };
+
+    const renderButtons = () => {
+        if (isTimerVisible) {
             return (
                 <>
-                    <IconButton onClick={handleIsDone}>
-                        <BiCheck title="Done" />
+                    <IconButton onClick={handlePlayPause}>
+                        {isRunning ? <BiPause title="Pause" /> : <BiPlay title="Play" />}
                     </IconButton>
-                    <IconButton onClick={handleEdit}>
-                        <BiEditAlt title="Edit" />
+                    <IconButton onClick={handleStop}>
+                        <BiCheck title="Stop and Mark as Done" />
                     </IconButton>
-                    <IconButton onClick={onDeleteTask}>
-                        <BiSolidTrash title="Trash can" />
+                    <IconButton onClick={handleReset}>
+                        <BiReset title="Reset" />
                     </IconButton>
                 </>
             );
         }
+
+        if (isEdit) {
+            return (
+                <>
+                    <IconButton onClick={handleSave}>
+                        <BiTask title="Accept" />
+                    </IconButton>
+                    <IconButton onClick={handleCancel}>
+                        <BiTaskX title="Undo" />
+                    </IconButton>
+                </>
+            );
+        }
+
         return (
             <>
-                <IconButton onClick={handleSave}>
-                    <BiTask title="Accept" />
+                <IconButton onClick={handleIsDone}>
+                    <BiTimer title="Start" />
                 </IconButton>
-                <IconButton onClick={handleCancel}>
-                    <BiTaskX title="Undo" />
+                <IconButton onClick={handleEdit}>
+                    <BiEditAlt title="Edit" />
+                </IconButton>
+                <IconButton onClick={onDeleteTask}>
+                    <BiSolidTrash title="Trash can" />
                 </IconButton>
             </>
         );
-    }, [isEdit, handleEdit, handleSave, handleCancel]);
+    };
 
     return (
-        <li>
-            <div>
-                {!isEdit && (
-                    <div className={styles.taskContainer}>{task.description}</div>
-                )}
-                {isEdit && (
-                    <TaskInput autoFocus value={inputEdit} onChange={handleChangeInput} />
-                )}
-            </div>
-            <div className={styles.buttons}>{renderEditButton()}</div>
-        </li>
+        <div className={styles.taskItem}>
+            <li className={styles.taskContainer} onClick={toggleTimerVisibility}>
+                <div className={styles.taskContent}>
+                    {!isEdit && !isTimerVisible && task.description}
+                    {isEdit && (
+                        <TaskInput autoFocus value={inputEdit} onChange={handleChangeInput} />
+                    )}
+                    {isTimerVisible && (
+                        <div className={styles.timerContainer}>
+                            <p className={styles.timerDisplay}>{new Date(time * 1000).toISOString().substr(11, 8)}</p>
+                        </div>
+                    )}
+                </div>
+            </li>
+            <div className={styles.buttons}>{renderButtons()}</div>
+        </div>
     );
 };
 

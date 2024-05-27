@@ -1,3 +1,4 @@
+import { SaveTaskTimeParams } from "../models/SaveTaskTimeParams";
 import { Task } from "../models/Task";
 import { mocks as rawMocks } from "../moks/moks";
 
@@ -87,6 +88,19 @@ class TodosService {
   }
 
   // editTask, taskIsDone, save добавить
+
+  async saveTaskTime({ taskId, time }: SaveTaskTimeParams) {
+    const taskIndex = mocks.findIndex((task) => task.id === taskId);
+    if (taskIndex !== -1) {
+      // Here we simulate saving time to the task; in a real application, this would be a different structure
+      return resolveWithValue<{ taskId: string; time: number }>(
+        { taskId, time },
+        1000
+      );
+    } else {
+      return rejectWithValue("Task not found", 1000);
+    }
+  }
 }
 
 export default new TodosService();
