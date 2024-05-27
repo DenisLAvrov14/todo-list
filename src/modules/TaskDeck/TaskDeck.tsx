@@ -112,14 +112,15 @@ const TaskDeck: React.FC<Props> = (props) => {
     const handleStop = async (event: React.MouseEvent<HTMLButtonElement>) => {
         setIsTimerRunning(false);
         setIsTimerVisible(false);
+        saveTime(taskId, time); // Сохранение времени перед завершением
         await mutationAsDone.mutate(taskId);
     };
 
     const handleReset = () => {
         setIsTimerRunning(false);
         setIsTimerVisible(false);
+        saveTime(taskId, time); // Сохранение времени перед сбросом
         setTime(0);
-        saveTime(taskId, 0); // Resetting time to 0
     };
 
     const handlePlayPause = () => {
