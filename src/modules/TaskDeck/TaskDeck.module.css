@@ -19,10 +19,14 @@
   background-color: yellow;
   border: 1px solid bisque;
   width: 404px;
-  height: 31px; /* Устанавливаем высоту для контейнера задачи */
+  height: 31px;
   border-radius: 3px;
   margin-right: 5px;
-  cursor: pointer;
+  cursor: default; /* Начальный курсор */
+}
+
+.taskContainer.cursorPointer {
+  cursor: pointer; /* Курсор меняется на "руку" после запуска таймера */
 }
 
 .buttons {

@@ -34,6 +34,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [timerStarted, setTimerStarted] = useState<boolean>(false);
+    const [cursorPointer, setCursorPointer] = useState<boolean>(false); // новое состояние для управления курсором
 
     const handleEdit = useCallback(() => {
         setIsEdit((prev) => !prev);
@@ -91,6 +92,7 @@ const TaskDeck: React.FC<Props> = (props) => {
             setIsTimerRunning(true);
             setIsTimerVisible(true);
             setTimerStarted(true);
+            setCursorPointer(true); // устанавливаем курсор на pointer
         },
         []
     );
@@ -190,7 +192,7 @@ const TaskDeck: React.FC<Props> = (props) => {
 
     return (
         <div className={styles.taskItem}>
-            <li className={styles.taskContainer} onClick={toggleTimerVisibility}>
+            <li className={`${styles.taskContainer} ${cursorPointer ? styles.cursorPointer : ''}`} onClick={toggleTimerVisibility}>
                 <div className={styles.taskContent}>
                     {!isEdit && !isTimerVisible && task.description}
                     {isEdit && (
