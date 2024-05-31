@@ -5,6 +5,7 @@ import styles from "./modules/CreateTask/CreateTask.module.css";
 import { useSelector } from "./redux/store";
 import { useMemo } from "react";
 import { useTodos } from "./hooks/useTodos";
+import Navbar from "./components/Navbar/Navbar";
 
 function App() {
   // const { allIds, byId } = useSelector((state) => state.todoTasks.tasks);
@@ -35,17 +36,20 @@ function App() {
   }, [filter, queryData]);
 
   return (
-    <div>
-      <CreateTask />
-      <ul className={styles.tracker}>
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : filteredData?.length ? (
-          filteredData.map((task) => <TaskDeck key={task.id} task={task} />)
-        ) : (
-          <h1>Data not found</h1>
-        )}
-      </ul>
+    <div className="app">
+      <Navbar />
+      <div className="content">
+        <CreateTask />
+        <ul className={styles.tracker}>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : filteredData?.length ? (
+            filteredData.map((task) => <TaskDeck key={task.id} task={task} />)
+          ) : (
+            <h1>Data not found</h1>
+          )}
+        </ul>
+      </div>
     </div>
   );
 }

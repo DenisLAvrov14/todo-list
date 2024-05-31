@@ -1,5 +1,11 @@
 .App {
   text-align: center;
+  display: flex;
+}
+
+.content {
+  margin-left: 250px; /* Adjust this value if sidebar width changes */
+  padding: 20px;
 }
 
 .App-logo {
