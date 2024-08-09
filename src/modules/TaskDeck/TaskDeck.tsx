@@ -17,7 +17,7 @@ import { editTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import todosService, { saveTaskTime } from "../../services/todos.service";
+import todosService, { saveTaskTime, taskIsDone } from "../../services/todos.service";
 
 type Props = {
     task: Task;
@@ -77,17 +77,6 @@ const TaskDeck: React.FC<Props> = (props) => {
         setInputEdit(e.target.value);
     }, []);
 
-    const mutationAsDone = useMutation({
-        mutationFn: async (taskId: number) => {
-            const result = await todosService.taskIsDone(taskId);
-            return result;
-        },
-        onSuccess: () => {
-            alert("Task marked as done");
-            queryClient.invalidateQueries({ queryKey: ["todos"] });
-        },
-    });
-
     const handleIsDone = useCallback(
         async (event: React.MouseEvent<HTMLButtonElement>) => {
             setIsTimerVisible(true);
@@ -112,19 +101,22 @@ const TaskDeck: React.FC<Props> = (props) => {
         const userId = 1; // Используйте актуальный userId здесь
         mutationSaveTime.mutate({ taskId, userId, startTime, endTime, duration });
     };
-    
-      
-      const handleStop = async (event: React.MouseEvent<HTMLButtonElement>) => {
+          
+    const handleStopAndMarkAsDone = async (event: React.MouseEvent<HTMLButtonElement>) => {
         setIsTimerVisible(false);
         const endTime = new Date();
+    
         if (startTime) {
-          const duration = (endTime.getTime() - startTime.getTime()) / 1000; // продолжительность в секундах
-          saveTaskTime(taskId, userId, startTime, endTime, duration); // Сохранение времени перед завершением
+            const duration = (endTime.getTime() - startTime.getTime()) / 1000; // продолжительность в секундах
+            console.log(`Saving task time for Task ID: ${taskId}, Duration: ${duration}s`);
+            await saveTaskTime(taskId, userId, startTime, endTime, duration); // Сохранение времени
         }
-        await mutationAsDone.mutate(taskId);
-      };
-      
-      
+    
+        console.log(`Marking task with ID ${taskId} as done`);
+        await taskIsDone(taskId); // Пометить задачу как выполненную
+        console.log(`Task with ID ${taskId} should now be marked as done`);
+    };
+    
       const handleReset = () => {
         setIsTimerVisible(false);
         const endTime = new Date();
@@ -162,7 +154,7 @@ const TaskDeck: React.FC<Props> = (props) => {
                     <IconButton onClick={handlePlayPause}>
                         {isRunning ? <BiPause title="Pause" /> : <BiPlay title="Play" />}
                     </IconButton>
-                    <IconButton onClick={handleStop}>
+                    <IconButton onClick={handleStopAndMarkAsDone}>
                         <BiCheck title="Stop and Mark as Done" />
                     </IconButton>
                     <IconButton onClick={handleReset}>

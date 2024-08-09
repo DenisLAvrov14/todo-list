@@ -16,35 +16,45 @@ function App() {
 
   const filteredData = useMemo(() => {
     if (queryData) {
-      switch (filter) {
-        case "all":
-          return queryData;
-        case "done":
-          return queryData.filter(({ isDone }: { isDone: boolean }) => isDone);
-        case "undone":
-          return queryData.filter(({ isDone }: { isDone: boolean }) => !isDone);
-        default:
-          return [];
-      }
+        console.log("Filter applied:", filter);
+        console.log("Data before filtering:", queryData);
+  
+        switch (filter) {
+            case "all":
+                return queryData;
+            case "done":
+                const doneTasks = queryData.filter(({ is_done }: { is_done: number }) => Boolean(is_done));
+                console.log("Done tasks:", doneTasks);
+                return doneTasks;
+            case "undone":
+                const undoneTasks = queryData.filter(({ is_done }: { is_done: number }) => !Boolean(is_done));
+                console.log("Undone tasks:", undoneTasks);
+                return undoneTasks;
+            default:
+                return [];
+        }
     }
     return [];
   }, [filter, queryData]);
 
   return (
     <div className="app">
-      <Navbar />
-      <div className="content">
-        <CreateTask />
-        <ul className={styles.tracker}>
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : filteredData?.length ? (
-            filteredData.map((task: Task) => <TaskDeck key={task.id} task={task} />)
-          ) : (
-            <h1>Data not found</h1>
-          )}
-        </ul>
-      </div>
+        <Navbar />
+        <div className="content">
+            <CreateTask />
+            <ul className={styles.tracker}>
+                {isLoading ? (
+                    <div>Loading...</div>
+                ) : filteredData?.length ? (
+                    filteredData.map((task: Task) => {
+                        console.log("Rendering task:", task);
+                        return <TaskDeck key={task.id} task={task} />;
+                    })
+                ) : (
+                    <h1>Data not found</h1>
+                )}
+            </ul>
+        </div>
     </div>
   );
 }
