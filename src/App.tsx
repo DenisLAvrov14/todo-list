@@ -1,17 +1,16 @@
+import React, { useMemo } from "react";
 import "./App.css";
 import CreateTask from "./modules/CreateTask/CraeteTask";
 import TaskDeck from "./modules/TaskDeck/TaskDeck";
 import styles from "./modules/CreateTask/CreateTask.module.css";
 import { useSelector } from "./redux/store";
-import { useMemo } from "react";
+import { RootState } from "./redux/store"; // убедитесь, что у вас есть RootState
 import { useTodos } from "./hooks/useTodos";
 import Navbar from "./components/Navbar/Navbar";
+import { Task } from "./models/Task"; // убедитесь, что у вас есть Task модель
 
 function App() {
-  // const { allIds, byId } = useSelector((state) => state.todoTasks.tasks);
-  const filter = useSelector((state) => state.todoTasks.filter);
-
-  // const taskList = useMemo(() => allIds.map((id) => byId[id]), [allIds, byId]);
+  const filter = useSelector((state: RootState) => state.todoTasks.filter);
 
   const { isLoading, data: queryData } = useTodos();
 
@@ -20,18 +19,14 @@ function App() {
       switch (filter) {
         case "all":
           return queryData;
-
         case "done":
-          return queryData.filter(({ isDone }) => isDone);
-
+          return queryData.filter(({ isDone }: { isDone: boolean }) => isDone);
         case "undone":
-          return queryData.filter(({ isDone }) => !isDone);
-
+          return queryData.filter(({ isDone }: { isDone: boolean }) => !isDone);
         default:
           return [];
       }
     }
-
     return [];
   }, [filter, queryData]);
 
@@ -44,7 +39,7 @@ function App() {
           {isLoading ? (
             <div>Loading...</div>
           ) : filteredData?.length ? (
-            filteredData.map((task) => <TaskDeck key={task.id} task={task} />)
+            filteredData.map((task: Task) => <TaskDeck key={task.id} task={task} />)
           ) : (
             <h1>Data not found</h1>
           )}

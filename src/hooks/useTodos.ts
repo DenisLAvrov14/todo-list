@@ -4,8 +4,8 @@ import todosService from "../services/todos.service";
 export const useTodos = () => {
   return useQuery({
     queryKey: ["todos"],
-    queryFn: () => todosService.getAll(),
-    select: ({ data }) => data,
+    queryFn: todosService.getTodos,
+    select: (data) => data,
     retry: 2,
   });
 };

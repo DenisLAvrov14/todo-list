@@ -1,106 +1,130 @@
-import { SaveTaskTimeParams } from "../models/SaveTaskTimeParams";
-import { Task } from "../models/Task";
-import { mocks as rawMocks } from "../moks/moks";
+import axios from 'axios';
 
-let mocks = rawMocks;
+const API_URL = 'http://localhost:3001';
 
-// перенести хелпер в папку utils
-export const resolveWithValue = <T>(data: T, ms: number): Promise<T> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(data);
-    }, ms);
-  });
-};
-const rejectWithValue = <T>(data: T, ms: number): Promise<T> => {
-  return new Promise((reject) => {
-    setTimeout(() => {
-      reject(data);
-    }, ms);
-  });
-};
-
-const resolved = async () => {
-  await resolveWithValue(true, 1500);
-};
-
-resolved();
-
-const rejected = async () => {
+export const getTodos = async () => {
   try {
-    await rejectWithValue("Error occurred", 1500);
+    const response = await axios.get(`${API_URL}/todos`);
+    return response.data;
   } catch (error) {
-    console.error("Error occurred: ", error);
+    console.error('Error fetching todos:', error);
+    throw error;
   }
 };
 
-rejected();
-
-// type DataTasks2<T = Task[]> = {data: T}
-
-type TResponse<T> = { data: T };
-
-class TodosService {
-  // private URL = "http://localhost:3000/";
-
-  async getAll() {
-    // return axios.get<Task[]>(`${this.URL}/todos`);
-
-    return resolveWithValue<TResponse<Task[]>>({ data: mocks }, 1000);
+export const addTodo = async (description: string, is_done: boolean) => {
+  try {
+    const response = await axios.post(`${API_URL}/tasks`, { description, is_done });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding todo:', error);
+    throw error;
   }
+};
 
-  async getById(id: string) {
-    // return axios.get<Task>(`${this.URL}/${id}`);
-    const task = mocks.find((task) => task.id === id);
-
-    if (!task) {
-      return rejectWithValue("Task not found", 1000);
-    }
-
-    return resolveWithValue<TResponse<Task[]>>({ data: mocks }, 1000);
+export const updateTodo = async (id: number, task: string, completed: boolean) => {
+  try {
+    const response = await axios.put(`${API_URL}/todos/${id}`, { task, completed });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating todo:', error);
+    throw error;
   }
+};
 
-  async deleteTask(id: string) {
-    mocks = mocks.filter((task) => task.id !== id);
-
-    return resolveWithValue({ status: 200 }, 1000);
+export const deleteTodo = async (id: number) => {
+  try {
+    await axios.delete(`${API_URL}/todos/${id}`);
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+    throw error;
   }
+};
 
-  async addTask(task: { id: string; description: string; isDone: boolean }) {
-    const newTask: Task = {
-      id: task.id,
-      description: task.description,
-      isDone: false,
-    };
-
-    const addTask = mocks.push(newTask);
-
-    return resolveWithValue({ data: newTask, status: 200 }, 1000);
+// Новые функции для взаимодействия с пользователями, задачами и временем выполнения задач
+export const createUser = async (username: string, email: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/users`, { username, email });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
   }
+};
 
-  async taskIsDone(id: string) {
-    const taskIndex = mocks.findIndex((task) => task.id === id);
-    if (taskIndex !== -1) {
-      mocks[taskIndex].isDone = true;
-
-      return resolveWithValue<TResponse<Task[]>>({ data: mocks }, 1000);
-    }
+export const createTask = async (id: number, description: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/tasks`, { id, description });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating task:', error);
+    throw error;
   }
+};
 
-  // editTask, taskIsDone, save добавить
+export const createTaskTime = async (taskId: number, startTime: Date, endTime: Date, duration: number) => {
+  const startTimeFormatted = startTime.toISOString().slice(0, 19).replace('T', ' ');
+  const endTimeFormatted = endTime.toISOString().slice(0, 19).replace('T', ' ');
 
-  async saveTaskTime({ taskId, time }: SaveTaskTimeParams) {
-    const taskIndex = mocks.findIndex((task) => task.id === taskId);
-    if (taskIndex !== -1) {
-      // Here we simulate saving time to the task; in a real application, this would be a different structure
-      return resolveWithValue<{ taskId: string; time: number }>(
-        { taskId, time },
-        1000
-      );
-    } else {
-      return rejectWithValue("Task not found", 1000);
-    }
+  try {
+    const response = await axios.post(`${API_URL}/task_times`, { task_id: taskId, start_time: startTimeFormatted, end_time: endTimeFormatted, duration });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating task time:', error);
+    throw error;
   }
-}
+};
 
-export default new TodosService();
+export const getTaskTimes = async (userId: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/task_times/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting task times:', error);
+    throw error;
+  }
+};
+
+// Новые методы
+export const taskIsDone = async (taskId: number) => {
+  try {
+    const response = await axios.put(`${API_URL}/tasks/${taskId}/done`);
+    return response.data;
+  } catch (error) {
+    console.error('Error marking task as done:', error);
+    throw error;
+  }
+};
+
+export const saveTaskTime = async (taskId: number, userId: number, startTime: Date, endTime: Date, duration: number) => {
+  try {
+    const response = await axios.post(`${API_URL}/task_times`, {
+      task_id: taskId,
+      user_id: userId,
+      start_time: startTime,
+      end_time: endTime,
+      duration: duration
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error saving task time:', error);
+    throw error;
+  }
+};
+
+
+// Экспортируем объект по умолчанию
+const todosService = {
+  getTodos,
+  addTodo,
+  updateTodo,
+  deleteTodo,
+  createUser,
+  createTask,
+  createTaskTime,
+  getTaskTimes,
+  taskIsDone,
+  saveTaskTime,
+};
+
+export default todosService;                                                                                       

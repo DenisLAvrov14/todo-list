@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useState, useContext } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import styles from "./CreateTask.module.css";
 import { BiSolidPlusCircle } from "react-icons/bi";
 import { useDispatch } from "react-redux";
@@ -19,33 +19,26 @@ const CreateTask: React.FC = () => {
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
-        mutationFn: async (task: { id: string; description: string; isDone: boolean }) => {
-            const result = await todosService.addTask(task)
-
+        mutationFn: async (task: { userId: number; description: string }) => {
+            const result = await todosService.createTask(task.userId, task.description)
             return result;
         },
         onSuccess: () => {
             alert('Task was added');
             queryClient.invalidateQueries({ queryKey: ['todos'] });
         }
-    })
+    });
 
     const handleAddTask = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        const id = String(Math.floor(Math.random() * 10000000));
-        const newTask = { id, description: taskDescription, isDone: false };
+        const userId = 1; // Убедитесь, что userId передается правильно
+        const newTask = { userId, description: taskDescription };
         mutation.mutate(newTask);
         setTaskDescription("");
-    }, [mutation]);
-
-
-    // const handleAddTask = useCallback(() => {
-    //     dispatch(addTask({ description: taskDescription }));
-    //     setTaskDescription("");
-    // }, [dispatch, taskDescription]);
+    }, [mutation, taskDescription]);
 
     const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setTaskDescription(e.target.value);
-    }, [setTaskDescription]);
+    }, []);
 
     const setFilter = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
         setFilterValue(event.target.value as Filter);
@@ -53,7 +46,7 @@ const CreateTask: React.FC = () => {
 
     useEffect(() => {
         dispatch(setFilterValueAC(filterValue));
-    }, [filterValue]);
+    }, [filterValue, dispatch]);
 
     return (
         <div className={styles.tasker}>

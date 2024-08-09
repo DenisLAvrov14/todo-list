@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useState, useEffect } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import {
     BiSolidTrash,
     BiTask,
@@ -17,7 +17,7 @@ import { editTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import todosService from "../../services/todos.service";
+import todosService, { saveTaskTime } from "../../services/todos.service";
 
 type Props = {
     task: Task;
@@ -26,26 +26,27 @@ type Props = {
 const TaskDeck: React.FC<Props> = (props) => {
     const { task } = props;
     const dispatch = useDispatch();
+    const userId = 1; 
 
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [inputEdit, setInputEdit] = useState<string>(task.description);
-    const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
     const [isTimerVisible, setIsTimerVisible] = useState<boolean>(false);
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [timerStarted, setTimerStarted] = useState<boolean>(false);
     const [cursorPointer, setCursorPointer] = useState<boolean>(false); // новое состояние для управления курсором
+    const [startTime, setStartTime] = useState<Date | null>(null); // добавляем состояние для startTime
 
     const handleEdit = useCallback(() => {
         setIsEdit((prev) => !prev);
     }, []);
 
-    const taskId = task.id;
+    const taskId = parseInt(task.id, 10); // преобразуем taskId в number
     const queryClient = useQueryClient();
 
     const mutationDelete = useMutation({
-        mutationFn: async (taskId: string) => {
-            const result = await todosService.deleteTask(taskId);
+        mutationFn: async (taskId: number) => {
+            const result = await todosService.deleteTodo(taskId);
             return result;
         },
         onSuccess: () => {
@@ -66,7 +67,7 @@ const TaskDeck: React.FC<Props> = (props) => {
             })
         );
         setIsEdit(false);
-    }, [dispatch, task.id, inputEdit]);
+    }, [dispatch, task, inputEdit]);
 
     const handleCancel = useCallback(() => {
         setIsEdit(false);
@@ -77,7 +78,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     }, []);
 
     const mutationAsDone = useMutation({
-        mutationFn: async (taskId: string) => {
+        mutationFn: async (taskId: number) => {
             const result = await todosService.taskIsDone(taskId);
             return result;
         },
@@ -89,17 +90,17 @@ const TaskDeck: React.FC<Props> = (props) => {
 
     const handleIsDone = useCallback(
         async (event: React.MouseEvent<HTMLButtonElement>) => {
-            setIsTimerRunning(true);
             setIsTimerVisible(true);
             setTimerStarted(true);
             setCursorPointer(true); // устанавливаем курсор на pointer
+            setStartTime(new Date()); // Устанавливаем текущее время как startTime
         },
         []
     );
 
     const mutationSaveTime = useMutation({
-        mutationFn: async ({ taskId, time }: { taskId: string, time: number }) => {
-            const result = await todosService.saveTaskTime({ taskId, time });
+        mutationFn: async ({ taskId, startTime, endTime, duration }: { taskId: number, userId: number, startTime: Date, endTime: Date, duration: number }) => {
+            const result = await todosService.saveTaskTime(taskId, userId, startTime, endTime, duration);
             return result;
         },
         onSuccess: () => {
@@ -107,23 +108,32 @@ const TaskDeck: React.FC<Props> = (props) => {
         },
     });
 
-    const saveTime = (taskId: string, time: number) => {
-        mutationSaveTime.mutate({ taskId, time });
+    const saveTime = (taskId: number, startTime: Date, endTime: Date, duration: number) => {
+        const userId = 1; // Используйте актуальный userId здесь
+        mutationSaveTime.mutate({ taskId, userId, startTime, endTime, duration });
     };
-
-    const handleStop = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        setIsTimerRunning(false);
+    
+      
+      const handleStop = async (event: React.MouseEvent<HTMLButtonElement>) => {
         setIsTimerVisible(false);
-        saveTime(taskId, time); // Сохранение времени перед завершением
+        const endTime = new Date();
+        if (startTime) {
+          const duration = (endTime.getTime() - startTime.getTime()) / 1000; // продолжительность в секундах
+          saveTaskTime(taskId, userId, startTime, endTime, duration); // Сохранение времени перед завершением
+        }
         await mutationAsDone.mutate(taskId);
-    };
-
-    const handleReset = () => {
-        setIsTimerRunning(false);
+      };
+      
+      
+      const handleReset = () => {
         setIsTimerVisible(false);
-        saveTime(taskId, time); // Сохранение времени перед сбросом
+        const endTime = new Date();
+        if (startTime) {
+          const duration = (endTime.getTime() - startTime.getTime()) / 1000; // продолжительность в секундах
+          saveTime(taskId, startTime, endTime, duration); // Сохранение времени перед сбросом
+        }
         setTime(0);
-    };
+      };
 
     const handlePlayPause = () => {
         setIsRunning(prevIsRunning => !prevIsRunning);
