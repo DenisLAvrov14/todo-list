@@ -59,15 +59,22 @@ const TaskDeck: React.FC<Props> = (props) => {
         await mutationDelete.mutate(taskId);
     }, [mutationDelete, taskId]);
 
+    const mutationUpdateTask = useMutation({
+        mutationFn: async ({ id, description }: { id: number, description: string }) => {
+            const result = await todosService.updateTodo(id, description, task.isDone);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
+            setIsEdit(false);
+        },
+    });
+    
     const handleSave = useCallback(() => {
-        dispatch(
-            editTask({
-                ...task,
-                description: inputEdit,
-            })
-        );
-        setIsEdit(false);
-    }, [dispatch, task, inputEdit]);
+        mutationUpdateTask.mutate({ id: parseInt(task.id, 10), description: inputEdit });
+    }, [inputEdit, mutationUpdateTask, task.id]);
+    
+    
 
     const handleCancel = useCallback(() => {
         setIsEdit(false);

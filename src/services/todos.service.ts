@@ -22,9 +22,9 @@ export const addTodo = async (description: string, is_done: boolean) => {
   }
 };
 
-export const updateTodo = async (id: number, task: string, completed: boolean) => {
+export const updateTodo = async (id: number, description: string, is_done: boolean) => {
   try {
-    const response = await axios.put(`${API_URL}/todos/${id}`, { task, completed });
+    const response = await axios.put(`${API_URL}/todos/${id}`, { description, is_done });
     return response.data;
   } catch (error) {
     console.error('Error updating todo:', error);

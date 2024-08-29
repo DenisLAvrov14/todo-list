@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import './Navbar.css';
+import Statistic from '../../modules/Statistic/Statistic';
+import Todo from '../../modules/Todo/Todo';
+
 
 const tabs = [
-    { label: 'Todo', icon: '✅' },
-    { label: 'Statistic', icon: '📊' },
-    { label: 'Map', icon: '🗺️' },
-    { label: 'Social', icon: '👥' }
+    { label: 'Todo', icon: '✅', component: <Todo /> },
+    { label: 'Statistic', icon: '📊', component: <Statistic /> },
+    { label: 'Map', icon: '🗺️', component: <></>},
+    { label: 'Social', icon: '👥', component: <></> }
 ];
 
 const Navbar = () => {
@@ -41,7 +44,7 @@ const Navbar = () => {
                     exit={{ y: -10, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                 >
-                    {/* Содержимое для {selectedTab.label} */}
+                    {selectedTab.component}  {/* Замените комментарий на рендеринг соответствующего компонента */}
                 </motion.div>
             </div>
         </>
