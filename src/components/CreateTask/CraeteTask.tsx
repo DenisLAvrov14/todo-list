@@ -30,7 +30,7 @@ const CreateTask: React.FC = () => {
     });
 
     const handleAddTask = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        const userId = 1; // Убедитесь, что userId передается правильно
+        const userId = 1; 
         const newTask = { userId, description: taskDescription };
         mutation.mutate(newTask);
         setTaskDescription("");
