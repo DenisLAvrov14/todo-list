@@ -9,8 +9,8 @@ export const ChangeTheme = () => {
     const toggleTheme = () => {
         const newTheme = theme === "dark" ? "light" : "dark";
         setTheme(newTheme);
-        localStorage.setItem("theme", newTheme); 
-    };
+        localStorage.setItem("theme", newTheme);
+      };
 
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme");

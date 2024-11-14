@@ -22,17 +22,17 @@ export const addTodo = async (description: string, is_done: boolean) => {
   }
 };
 
-export const updateTodo = async (id: number, description: string, is_done: boolean) => {
+export const updateTodo = async (id: string, description: string, is_done: boolean) => {
   try {
-    const response = await axios.put(`${API_URL}/todos/${id}`, { description, is_done });
-    return response.data;
+      const response = await axios.put(`${API_URL}/todos/${id}`, { description, is_done });
+      return response.data;
   } catch (error) {
-    console.error('Error updating todo:', error);
-    throw error;
+      console.error('Error updating todo:', error);
+      throw error;
   }
 };
 
-export const deleteTodo = async (id: number) => {
+export const deleteTodo = async (id: string) => {
   try {
     await axios.delete(`${API_URL}/todos/${id}`);
   } catch (error) {
@@ -52,9 +52,9 @@ export const createUser = async (username: string, email: string) => {
   }
 };
 
-export const createTask = async (id: number, description: string) => {
+export const createTask = async (description: string) => {
   try {
-    const response = await axios.post(`${API_URL}/tasks`, { id, description });
+    const response = await axios.post(`${API_URL}/tasks`, { description });
     return response.data;
   } catch (error) {
     console.error('Error creating task:', error);
@@ -86,32 +86,31 @@ export const getTaskTimes = async (userId: number) => {
 };
 
 // Новые методы
-export const taskIsDone = async (taskId: number) => {
+export const taskIsDone = async (taskId: string) => {
   try {
-    const response = await axios.put(`${API_URL}/tasks/${taskId}/done`);
-    return response.data;
+      const response = await axios.put(`${API_URL}/tasks/${taskId}/done`);
+      return response.data;
   } catch (error) {
-    console.error('Error marking task as done:', error);
-    throw error;
+      console.error('Error marking task as done:', error);
+      throw error;
   }
 };
 
-export const saveTaskTime = async (taskId: number, userId: number, startTime: Date, endTime: Date, duration: number) => {
+export const saveTaskTime = async (taskId: string, userId: number, startTime: Date, endTime: Date, duration: number) => {
   try {
-    const response = await axios.post(`${API_URL}/task_times`, {
-      task_id: taskId,
-      user_id: userId,
-      start_time: startTime,
-      end_time: endTime,
-      duration: duration
-    });
-    return response.data;
+      const response = await axios.post(`${API_URL}/task_times`, {
+          task_id: taskId,
+          user_id: userId,
+          start_time: startTime,
+          end_time: endTime,
+          duration: duration
+      });
+      return response.data;
   } catch (error) {
-    console.error('Error saving task time:', error);
-    throw error;
+      console.error('Error saving task time:', error);
+      throw error;
   }
 };
-
 
 // Экспортируем объект по умолчанию
 const todosService = {

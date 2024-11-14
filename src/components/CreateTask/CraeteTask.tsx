@@ -1,52 +1,48 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import styles from "./CreateTask.module.css";
 import { BiSolidPlusCircle } from "react-icons/bi";
 import { useDispatch } from "react-redux";
-import { setFilterValueAC } from "../../redux/taskSlice/CreateTaskSlice";
+import { setFilterValue, addTask } from "../../redux/taskSlice/CreateTaskSlice"; 
 import { IconButton } from "../../components/IconButton/IconButton";
 import { Filter } from "../../models/InitialTask";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import todosService from "../../services/todos.service";
 import ChangeTheme from "../../components/ChangeTheme/ChangeTheme";
+import { v4 as uuidv4 } from "uuid";
 
 const CreateTask: React.FC = () => {
-
     const dispatch = useDispatch();
-
     const [taskDescription, setTaskDescription] = useState<string>("");
-    const [filterValue, setFilterValue] = useState<Filter>("all");
+    const [filterValue, setLocalFilterValue] = useState<Filter>("all");
 
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
-        mutationFn: async (task: { userId: number; description: string }) => {
-            const result = await todosService.createTask(task.userId, task.description)
-            return result;
+        mutationFn: async (description: string) => {
+          const result = await todosService.createTask(description);
+          return result;
         },
-        onSuccess: () => {
-            alert('Task was added');
-            queryClient.invalidateQueries({ queryKey: ['todos'] });
-        }
-    });
-
-    const handleAddTask = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        const userId = 1; 
-        const newTask = { userId, description: taskDescription };
-        mutation.mutate(newTask);
+        onSuccess: (data) => {
+          alert("Task was added");
+          dispatch(addTask({ id: data.id, description: data.description, isDone: false }));
+          queryClient.invalidateQueries({ queryKey: ["todos"] });
+        },
+      });
+      
+      const handleAddTask = useCallback(() => {
+        mutation.mutate(taskDescription);
         setTaskDescription("");
-    }, [mutation, taskDescription]);
+      }, [mutation, taskDescription]);   
 
     const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setTaskDescription(e.target.value);
     }, []);
 
-    const setFilter = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
-        setFilterValue(event.target.value as Filter);
-    }, []);
-
-    useEffect(() => {
-        dispatch(setFilterValueAC(filterValue));
-    }, [filterValue, dispatch]);
+    const handleFilterChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
+        const newFilter = event.target.value as Filter;
+        setLocalFilterValue(newFilter);
+        dispatch(setFilterValue(newFilter));
+    }, [dispatch]);
 
     return (
         <div className={styles.tasker}>
@@ -65,7 +61,7 @@ const CreateTask: React.FC = () => {
                 <IconButton onClick={handleAddTask}>
                     <BiSolidPlusCircle title="Add task" />
                 </IconButton>
-                <select onChange={setFilter} value={filterValue}>
+                <select onChange={handleFilterChange} value={filterValue}>
                     <option value="all">All</option>
                     <option value="done">Done</option>
                     <option value="undone">Undone</option>

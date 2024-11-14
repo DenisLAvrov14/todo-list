@@ -13,7 +13,6 @@ import {
 import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
 import { useDispatch } from "react-redux";
-import { editTask } from "../../redux/taskSlice/CreateTaskSlice";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,11 +40,11 @@ const TaskDeck: React.FC<Props> = (props) => {
         setIsEdit((prev) => !prev);
     }, []);
 
-    const taskId = parseInt(task.id, 10); // преобразуем taskId в number
+    const taskId = task.id; 
     const queryClient = useQueryClient();
 
     const mutationDelete = useMutation({
-        mutationFn: async (taskId: number) => {
+        mutationFn: async (taskId: string) => {
             const result = await todosService.deleteTodo(taskId);
             return result;
         },
@@ -60,7 +59,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     }, [mutationDelete, taskId]);
 
     const mutationUpdateTask = useMutation({
-        mutationFn: async ({ id, description }: { id: number, description: string }) => {
+        mutationFn: async ({ id, description }: { id: string, description: string }) => {
             const result = await todosService.updateTodo(id, description, task.isDone);
             return result;
         },
@@ -71,11 +70,9 @@ const TaskDeck: React.FC<Props> = (props) => {
     });
     
     const handleSave = useCallback(() => {
-        mutationUpdateTask.mutate({ id: parseInt(task.id, 10), description: inputEdit });
+        mutationUpdateTask.mutate({ id: task.id, description: inputEdit });
     }, [inputEdit, mutationUpdateTask, task.id]);
     
-    
-
     const handleCancel = useCallback(() => {
         setIsEdit(false);
     }, []);
@@ -95,7 +92,7 @@ const TaskDeck: React.FC<Props> = (props) => {
     );
 
     const mutationSaveTime = useMutation({
-        mutationFn: async ({ taskId, startTime, endTime, duration }: { taskId: number, userId: number, startTime: Date, endTime: Date, duration: number }) => {
+        mutationFn: async ({ taskId, startTime, endTime, duration }: { taskId: string, userId: number, startTime: Date, endTime: Date, duration: number }) => {
             const result = await todosService.saveTaskTime(taskId, userId, startTime, endTime, duration);
             return result;
         },
@@ -104,7 +101,7 @@ const TaskDeck: React.FC<Props> = (props) => {
         },
     });
 
-    const saveTime = (taskId: number, startTime: Date, endTime: Date, duration: number) => {
+    const saveTime = (taskId: string, startTime: Date, endTime: Date, duration: number) => {
         const userId = 1; // Используйте актуальный userId здесь
         mutationSaveTime.mutate({ taskId, userId, startTime, endTime, duration });
     };
@@ -124,15 +121,15 @@ const TaskDeck: React.FC<Props> = (props) => {
         console.log(`Task with ID ${taskId} should now be marked as done`);
     };
     
-      const handleReset = () => {
+    const handleReset = () => {
         setIsTimerVisible(false);
         const endTime = new Date();
         if (startTime) {
-          const duration = (endTime.getTime() - startTime.getTime()) / 1000; // продолжительность в секундах
-          saveTime(taskId, startTime, endTime, duration); // Сохранение времени перед сбросом
+            const duration = (endTime.getTime() - startTime.getTime()) / 1000; // продолжительность в секундах
+            saveTime(taskId, startTime, endTime, duration); // Сохранение времени перед сбросом
         }
         setTime(0);
-      };
+    };
 
     const handlePlayPause = () => {
         setIsRunning(prevIsRunning => !prevIsRunning);

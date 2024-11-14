@@ -1,66 +1,77 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { Filter, InitialStateTask } from "../../models/InitialTask";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Task } from "../../models/Task";
+import { TaskState } from "../../models/TaskState";
+import { Filter } from "../../models/InitialTask";
 
-type AddTaskPayload = {
-  description: string;
-};
-
-const initialState: InitialStateTask = {
-  tasks: {
-    allIds: [],
-    byId: {},
-  },
+const initialState: TaskState = {
+  tasks: {},
+  timer: {},
   filter: "all",
 };
 
-export const CreateTaskSlice = createSlice({
+const taskSlice = createSlice({
   name: "todoTasks",
   initialState,
   reducers: {
-    addTask: (state, action: PayloadAction<AddTaskPayload>) => {
-      const { description } = action.payload;
-
-      const id = String(Math.floor(Math.random() * 10000000));
-
-      const newTask: Task = {
-        id,
-        description,
-        isDone: false,
-      };
-
-      state.tasks.byId[id] = newTask;
-      state.tasks.allIds.push(newTask.id);
+    addTask: (state, action: PayloadAction<Task>) => {
+      const { id, description, isDone } = action.payload;
+      state.tasks[id] = { id, description, isDone };
+      state.timer[id] = { time: 0, isRunning: false };
     },
-    removeTask: (state, action: PayloadAction<string>) => {
-      const idToRemove = action.payload;
-
-      state.tasks.allIds = state.tasks.allIds.filter(
-        (task) => task !== idToRemove
-      );
-      delete state.tasks.byId[idToRemove];
-    },
-    editTask: (state, action: PayloadAction<Task>) => {
+    updateTask: (state, action: PayloadAction<{ id: string; description: string }>) => {
       const { id, description } = action.payload;
-
-      const taskToEdit = state.tasks.byId[id];
-      if (taskToEdit) {
-        taskToEdit.description = description;
+      if (state.tasks[id]) {
+        state.tasks[id].description = description;
       }
     },
-    // switchIsDone: (state, action: PayloadAction<{ id: number }>) => {
-    //   const { id } = action.payload;
-
-    //   const taskAsDone = state.tasks.byId[id];
-    //   if (taskAsDone) {
-    //     taskAsDone.isDone = !taskAsDone.isDone;
-    //   }
-    // },
-    setFilterValueAC: (state, action: PayloadAction<Filter>) => {
+    deleteTask: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      delete state.tasks[id];
+      delete state.timer[id];
+    },
+    markTaskDone: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      if (state.tasks[id]) {
+        state.tasks[id].isDone = true;
+      }
+    },
+    toggleTimer: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      const timer = state.timer[id];
+      if (timer) {
+        timer.isRunning = !timer.isRunning;
+      }
+    },
+    resetTimer: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      const timer = state.timer[id];
+      if (timer) {
+        timer.time = 0;
+        timer.isRunning = false;
+      }
+    },
+    incrementTime: (state, action: PayloadAction<string>) => {
+      const id = action.payload;
+      const timer = state.timer[id];
+      if (timer && timer.isRunning) {
+        timer.time += 1;
+      }
+    },
+    setFilterValue: (state, action: PayloadAction<Filter>) => {
       state.filter = action.payload;
     },
   },
 });
 
-export const { addTask, removeTask, editTask, setFilterValueAC } =
-  CreateTaskSlice.actions;
+export const {
+  addTask,
+  updateTask,
+  deleteTask,
+  markTaskDone,
+  toggleTimer,
+  resetTimer,
+  incrementTime,
+  setFilterValue,
+} = taskSlice.actions;
+
+export default taskSlice.reducer;

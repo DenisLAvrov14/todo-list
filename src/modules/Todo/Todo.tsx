@@ -1,39 +1,39 @@
 import React, { useMemo } from 'react';
 import { useTodos } from '../../hooks/useTodos';
-import CreateTask from '../../components/CreateTask/CraeteTask';
 import styles from '../../components/CreateTask/CreateTask.module.css';
 import { Task } from '../../models/Task';
 import TaskDeck from '../../components/TaskDeck/TaskDeck';
 import { RootState, useSelector } from '../../redux/store';
+import CreateTask from '../../components/CreateTask/CraeteTask';
 
 const Todo: React.FC = () => {
-    const filter = useSelector((state: RootState) => state.todoTasks.filter);
+    const filter = useSelector((state: RootState) => state.tasks.filter);
 
-  const { isLoading, data: queryData } = useTodos();
+    const { isLoading, data: queryData } = useTodos();
 
-  const filteredData = useMemo(() => {
-    if (queryData) {
-        console.log("Filter applied:", filter);
-        console.log("Data before filtering:", queryData);
-  
-        switch (filter) {
-            case "all":
-                return queryData;
-            case "done":
-                const doneTasks = queryData.filter(({ is_done }: { is_done: number }) => Boolean(is_done));
-                console.log("Done tasks:", doneTasks);
-                return doneTasks;
-            case "undone":
-                const undoneTasks = queryData.filter(({ is_done }: { is_done: number }) => !Boolean(is_done));
-                console.log("Undone tasks:", undoneTasks);
-                return undoneTasks;
-            default:
-                return [];
+    // Фильтрация задач на основе текущего значения фильтра из Redux
+    const filteredData = useMemo(() => {
+        if (queryData) {
+            console.log("Filter applied:", filter);
+            console.log("Data before filtering:", queryData);
+
+            switch (filter) {
+                case "all":
+                    return queryData;
+                case "done":
+                    const doneTasks = queryData.filter((task: Task) => task.isDone);
+                    console.log("Done tasks:", doneTasks);
+                    return doneTasks;
+                case "undone":
+                    const undoneTasks = queryData.filter((task: Task) => !task.isDone);
+                    console.log("Undone tasks:", undoneTasks);
+                    return undoneTasks;
+                default:
+                    return [];
+            }
         }
-    }
-    return [];
-  }, [filter, queryData]);
-
+        return [];
+    }, [filter, queryData]);
 
     return (
         <>
